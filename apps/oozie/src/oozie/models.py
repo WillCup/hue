@@ -282,8 +282,8 @@ class WorkflowManager(models.Manager):
 
   def initialize(self, workflow, fs=None):
     Kill.objects.create(name='kill', workflow=workflow, node_type=Kill.node_type)
-    end = End.objects.create(name='end', workflow=workflow, node_type=End.node_type)
-    start = Start.objects.create(name='start', workflow=workflow, node_type=Start.node_type)
+    end = End.objects.get(workflow=workflow)
+    start = Start.objects.get(workflow=workflow)
 
     link = Link(parent=start, child=end, name='to')
     link.save()
@@ -454,6 +454,7 @@ class Workflow(Job):
 
     return dict([(param, '') for param in list(params)])
 
+  @property
   def actions(self):
     return Action.objects.filter(workflow=self, node_type__in=Action.types)
 
