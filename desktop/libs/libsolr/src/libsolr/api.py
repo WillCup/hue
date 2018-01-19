@@ -244,15 +244,17 @@ class SolrApi(object):
         #('mlt.maxwl', 1),
       )
       fl = '*'
+    #params += (('fq', "((product:\"Data Platform\" AND release:2.6.4.0))"),)
 
-    params += (('fl', fl),)
 
-    params += (
-      ('hl', 'true'),
-      ('hl.fl', '*'),
-      ('hl.snippets', 5),
-      ('hl.fragsize', 1000),
-    )
+#     params += (('fl', fl),)
+
+#     params += (
+#       ('hl', 'true'),
+#       ('hl.fl', '*'),
+#       ('hl.snippets', 5),
+#       ('hl.fragsize', 1000),
+#     )
 
     if collection['template']['fieldsSelected']:
       fields = []
@@ -266,7 +268,7 @@ class SolrApi(object):
           ('sort', ','.join(fields)),
         )
 
-    response = self._root.get('%(collection)s/select' % solr_query, params)
+    response = self._root.get('%(collection)s/query' % solr_query, params)
     return self._get_json(response)
 
 
@@ -883,9 +885,10 @@ class SolrApi(object):
 
 
   def _get_params(self):
-    if self.security_enabled:
-      return (('doAs', self._user ),)
-    return (('user.name', SERVER_USER.get()), ('doAs', self._user),)
+#     if self.security_enabled:
+#       return (('doAs', self._user ),)
+#     return (('user.name', SERVER_USER.get()), ('doAs', self._user),)
+    return ()
 
   def _get_q(self, query):
     q_template = '(%s)' if len(query['qs']) >= 2 else '%s'

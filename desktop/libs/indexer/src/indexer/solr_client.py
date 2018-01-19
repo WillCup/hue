@@ -87,7 +87,8 @@ class SolrClient(object):
     except Exception, e:
       msg = _('Solr server could not be contacted properly: %s') % e
       LOG.warn(msg)
-      raise PopupException(msg, detail=smart_str(e))
+      return [{'name': 'dhc', 'type': 'collection', 'collections': []}]
+      #raise PopupException(msg, detail=smart_str(e))
 
     return indexes
 
@@ -322,7 +323,10 @@ class SolrClient(object):
     global _ZOOKEEPER_HOST
     global _IS_SENTRY_PROTECTED
 
-    properties = self.api.info_system()
+    try:
+      properties = self.api.info_system()
+    except:
+      properties = {}
 
     _IS_SOLR_CLOUD = properties.get('mode', 'solrcloud') == 'solrcloud'
     _IS_SOLR_6_OR_MORE = not str(properties.get('lucene', {}).get('solr-spec-version')).startswith('4.')
