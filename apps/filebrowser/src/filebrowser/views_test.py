@@ -418,8 +418,8 @@ class TestFileBrowserWithHadoop(object):
       resp = self.c.get(url)
 
       # We are actually reading a directory
-      assert_equal('.', resp.context['files'][1]['name'])
-      assert_equal('..', resp.context['files'][0]['name'])
+      assert_equal('.', resp.context[0]['files'][1]['name'])
+      assert_equal('..', resp.context[0]['files'][0]['name'])
 
     # Test's home directory now exists. Should be returned.
     response = self.c.get('/filebrowser/view=' + prefix)
@@ -510,9 +510,9 @@ class TestFileBrowserWithHadoop(object):
 
     # Check filter with empty results
     resp = self.c.get('/filebrowser/view=' + BASE + '?filter=empty&sortby=name&descending=true&pagesize=1&pagenum=2')
-    listing = resp.context['files']
+    listing = resp.context[0]['files']
     assert_equal([], listing)
-    page = resp.context['page']
+    page = resp.context[0]['page']
     assert_equal({}, page)
 
 

@@ -136,7 +136,7 @@ class TestBeeswaxWithHadoop(BeeswaxSampleProvider):
     Return the id of that query
     """
     resp = self.client.get('/beeswax/query_history')
-    history = resp.context['page'].object_list[0]
+    history = resp.context[0]['page'].object_list[0]
     last_state = history.last_state
     assert_true(beeswax.models.QueryHistory.STATE[last_state] in (state,) + extra_states)
     return history.id
@@ -202,13 +202,13 @@ for x in sys.stdin:
 
     # Make sure expired query states are lazily updated.
     resp = self.client.get('/beeswax/query_history')
-    history = resp.context['page'].object_list[0]
+    history = resp.context[0]['page'].object_list[0]
     self.db.close_operation(history.get_full_object().get_handle())
     resp = self.client.get("/beeswax/execute/query/%s" % history.id)
     assert_true(resp.status_code, 302)
 
     resp = self.client.get('/beeswax/query_history')
-    history = resp.context['page'].object_list[0]
+    history = resp.context[0]['page'].object_list[0]
     assert_equal(beeswax.models.QueryHistory.STATE[history.last_state], beeswax.models.QueryHistory.STATE.expired)
 
 
@@ -866,22 +866,22 @@ for x in sys.stdin:
     # An auto hql design should be created, and it should ignore the given name and desc
     _make_query(self.client, 'SELECT bogus FROM test', name='mydesign', desc='hyatt', database=self.db_name)
     resp = cli.get('/beeswax/list_designs')
-    n_designs = len(resp.context['page'].object_list)
+    n_designs = len(resp.context[0]['page'].object_list)
 
     # Retrieve that design. It's the first one since it's most recent
     design = beeswax.models.SavedQuery.objects.all()[0]
     resp = cli.get('/beeswax/execute/design/%s' % design.id)
     assert_true('query' in resp.context, resp.context)
-    assert_true(resp.context['query'] is None, resp.context)
-    assert_equal(design, resp.context['design'], resp.context)
+    assert_true(resp.context[0]['query'] is None, resp.context)
+    assert_equal(design, resp.context[0]['design'], resp.context)
 
     # Retrieve that query history. It's the first one since it's most recent
     query_history = beeswax.models.QueryHistory.objects.all()[0]
     resp = cli.get('/beeswax/execute/query/%s' % query_history.id)
     assert_true('query' in resp.context, resp.context)
-    assert_true(resp.context['query'] is not None, resp.context)
+    assert_true(resp.context[0]['query'] is not None, resp.context)
     assert_true('design' in resp.context, resp.context)
-    assert_true(resp.context['design'] is not None, resp.context)
+    assert_true(resp.context[0]['design'] is not None, resp.context)
 
     resp = cli.get(reverse('beeswax:api_fetch_saved_design', kwargs={'design_id': design.id}))
     content = json.loads(resp.content)
@@ -892,7 +892,7 @@ for x in sys.stdin:
     wait_for_query_to_finish(self.client, resp, max=60.0)
 
     resp = cli.get('/beeswax/list_designs')
-    nplus_designs = len(resp.context['page'].object_list)
+    nplus_designs = len(resp.context[0]['page'].object_list)
     assert_true(nplus_designs == n_designs, 'Auto design should not show up in list_designs')
 
     # Test explicit save and use another DB
@@ -905,7 +905,7 @@ for x in sys.stdin:
 
     resp = cli.get('/beeswax/list_designs')
     assert_true('rubbish' in resp.content, resp.content)
-    nplusplus_designs = len(resp.context['page'].object_list)
+    nplusplus_designs = len(resp.context[0]['page'].object_list)
     assert_true(nplusplus_designs > nplus_designs)
 
     # Retrieve that design and check correct DB is selected
@@ -944,7 +944,7 @@ for x in sys.stdin:
     # Helper to test the view, filtering, etc
     def do_view(param):
       resp = cli.get('/beeswax/list_designs?' + param)
-      assert_true(len(resp.context['page'].object_list) >= 0)     # Make the query run
+      assert_true(len(resp.context[0]['page'].object_list) >= 0)     # Make the query run
       return resp
 
     do_view('user=test')
@@ -1399,14 +1399,14 @@ for x in sys.stdin:
     })
 
     # All of these errors should have been triggered!
-    assert_true(resp.context["table_form"].errors["input_format_class"])
-    assert_true(resp.context["table_form"].errors["output_format_class"])
-    assert_true(resp.context["table_form"].errors["serde_name"])
-    assert_true(resp.context["table_form"].errors["serde_properties"])
-    assert_true(resp.context["table_form"].errors["serde_properties"])
+    assert_true(resp.context[0]["table_form"].errors["input_format_class"])
+    assert_true(resp.context[0]["table_form"].errors["output_format_class"])
+    assert_true(resp.context[0]["table_form"].errors["serde_name"])
+    assert_true(resp.context[0]["table_form"].errors["serde_properties"])
+    assert_true(resp.context[0]["table_form"].errors["serde_properties"])
 
-    assert_true(resp.context["columns_form"].forms[0].errors["map_key_type"])
-    assert_true(resp.context["columns_form"].forms[0].errors["map_value_type"])
+    assert_true(resp.context[0]["columns_form"].forms[0].errors["map_key_type"])
+    assert_true(resp.context[0]["columns_form"].forms[0].errors["map_value_type"])
 
 
   def test_create_table_import(self):
@@ -1452,7 +1452,7 @@ for x in sys.stdin:
       'load_data': 'IMPORT',
       'name': 'test_create_import',
     })
-    assert_equal(resp.context['fields_list'], RAW_FIELDS)
+    assert_equal(resp.context[0]['fields_list'], RAW_FIELDS)
 
     # Test same with gzip
     resp = self.client.post('/beeswax/create/import_wizard/%s' % self.db_name, {
@@ -1461,7 +1461,7 @@ for x in sys.stdin:
       'load_data': 'IMPORT',
       'name': 'test_create_import',
     })
-    assert_equal(resp.context['fields_list'], RAW_FIELDS)
+    assert_equal(resp.context[0]['fields_list'], RAW_FIELDS)
 
     # Make sure space works
     resp = self.client.post('/beeswax/create/import_wizard/%s' % self.db_name, {
@@ -1473,7 +1473,7 @@ for x in sys.stdin:
       'delimiter_1': '',
       'file_type': 'text',
     })
-    assert_equal(len(resp.context['fields_list'][0]), 4)
+    assert_equal(len(resp.context[0]['fields_list'][0]), 4)
 
     # Make sure custom delimiters work
     resp = self.client.post('/beeswax/create/import_wizard/%s' % self.db_name, {
@@ -1485,7 +1485,7 @@ for x in sys.stdin:
       'delimiter_1': '|',
       'file_type': 'text',
     })
-    assert_equal(len(resp.context['fields_list'][0]), 3)
+    assert_equal(len(resp.context[0]['fields_list'][0]), 3)
 
     # Make sure quoted CSV works
     resp = self.client.post('/beeswax/create/import_wizard/%s' % self.db_name, {
@@ -1497,7 +1497,7 @@ for x in sys.stdin:
       'delimiter_1': ',',
       'file_type': 'text',
     })
-    assert_equal(resp.context['fields_list'], [
+    assert_equal(resp.context[0]['fields_list'], [
       ['a', 'b', 'c'],
       ['a,a', 'b,b', 'c,c'],
       ['a,"a', 'b,"b', 'c,"c'],
@@ -1514,7 +1514,7 @@ for x in sys.stdin:
       'file_type': 'gzip',
     })
     # Should have 3 columns available
-    assert_equal(len(resp.context['column_formset'].forms), 3)
+    assert_equal(len(resp.context[0]['column_formset'].forms), 3)
 
     # Test table creation and data loading
     resp = self.client.post('/beeswax/create/import_wizard/%s' % self.db_name, {
@@ -1541,10 +1541,10 @@ for x in sys.stdin:
     # Little nightmare here:
     # We have a POST (create table) with a redirect (load data) of redirect (show table)
     #
-    assert_equal(resp.context['action'], 'watch-redirect')
-    on_success_url_load_data = resp.context['on_success_url']
+    assert_equal(resp.context[0]['action'], 'watch-redirect')
+    on_success_url_load_data = resp.context[0]['on_success_url']
     assert_true('auto_load' in on_success_url_load_data, on_success_url_load_data)
-    query_history = resp.context['query_history']
+    query_history = resp.context[0]['query_history']
 
     resp = self.client.get(reverse('beeswax:api_fetch_query_history', kwargs={'query_history_id': query_history.id}), follow=True)
     content = json.loads(resp.content)
@@ -1559,17 +1559,17 @@ for x in sys.stdin:
 
     # Get URL that will load the data into the table. Also get the URL that will show the table in metastore app.
     resp = self.client.get(on_success_url_load_data, follow=True)
-    assert_equal(resp.context['action'], 'watch-redirect')
-    on_success_url_show_table = resp.context['on_success_url']
+    assert_equal(resp.context[0]['action'], 'watch-redirect')
+    on_success_url_show_table = resp.context[0]['on_success_url']
     assert_true('/metastore/table/' in on_success_url_show_table, on_success_url_show_table)
-    query_history = resp.context['query_history']
+    query_history = resp.context[0]['query_history']
 
     # Wait for load data to finish
     resp = wait_for_query_to_finish(self.client, MockResponse({'status': 'ok', 'watch_url': watch_url}), max=180.0)
 
     # Check data is in the table (by describing it)
     resp = self.client.get(on_success_url_show_table)
-    cols = resp.context['table'].cols
+    cols = resp.context[0]['table'].cols
     assert_equal(len(cols), 3)
     assert_equal([ col.name for col in cols ], [ 'col_a', 'col_b', 'col_c' ])
     resp = self.client.get(reverse('beeswax:get_sample_data', kwargs={'database': self.db_name, 'table': 'test_create_import'}))
@@ -1601,10 +1601,10 @@ for x in sys.stdin:
     }, follow=True)
 
     # We have a POST (create table) with a redirect (load data) of redirect (show table)
-    assert_equal(resp.context['action'], 'watch-redirect')
-    on_success_url_load_data = resp.context['on_success_url']
+    assert_equal(resp.context[0]['action'], 'watch-redirect')
+    on_success_url_load_data = resp.context[0]['on_success_url']
     assert_true('auto_load' in on_success_url_load_data, on_success_url_load_data)
-    query_history = resp.context['query_history']
+    query_history = resp.context[0]['query_history']
 
     resp = self.client.get(reverse('beeswax:api_fetch_query_history', kwargs={'query_history_id': query_history.id}), follow=True)
     content = json.loads(resp.content)
@@ -1615,10 +1615,10 @@ for x in sys.stdin:
 
     # Get URL that will load the data into the table. Also get the URL that will show the table in metastore app.
     resp = self.client.get(on_success_url_load_data, follow=True)
-    assert_equal(resp.context['action'], 'watch-redirect')
-    on_success_url_show_table = resp.context['on_success_url']
+    assert_equal(resp.context[0]['action'], 'watch-redirect')
+    on_success_url_show_table = resp.context[0]['on_success_url']
     assert_true('/metastore/table/' in on_success_url_show_table, on_success_url_show_table)
-    query_history = resp.context['query_history']
+    query_history = resp.context[0]['query_history']
 
     # Wait for load data to finish
     resp = wait_for_query_to_finish(self.client, MockResponse({'status': 'ok', 'watch_url': watch_url}), max=180.0)
@@ -1627,7 +1627,7 @@ for x in sys.stdin:
     resp = self.client.get(on_success_url_show_table)
 
     # Check data is in the table (by describing it)
-    cols = resp.context['table'].cols
+    cols = resp.context[0]['table'].cols
     assert_equal(len(cols), 3)
     assert_equal([col.name for col in cols], ['col_a', 'col_b', 'col_c'])
 
@@ -1670,10 +1670,10 @@ for x in sys.stdin:
         'create': 'Create database',
         'use_default_location': True,
       }, follow=True)
-      resp = self.client.get(reverse("beeswax:api_watch_query_refresh_json", kwargs={'id': resp.context['query'].id}), follow=True)
+      resp = self.client.get(reverse("beeswax:api_watch_query_refresh_json", kwargs={'id': resp.context[0]['query'].id}), follow=True)
       resp = wait_for_query_to_finish(self.client, resp, max=180.0)
       resp = self.client.get("/metastore/databases/")
-      assert_true(db_name in resp.context["databases"], resp)
+      assert_true(db_name in resp.context[0]["databases"], resp)
 
       # Test for accented characters in 'comment'
       resp = self.client.post("/beeswax/create/database", {
@@ -1682,10 +1682,10 @@ for x in sys.stdin:
         'create': 'Create database',
         'use_default_location': True,
       }, follow=True)
-      resp = self.client.get(reverse("beeswax:api_watch_query_refresh_json", kwargs={'id': resp.context['query'].id}), follow=True)
+      resp = self.client.get(reverse("beeswax:api_watch_query_refresh_json", kwargs={'id': resp.context[0]['query'].id}), follow=True)
       resp = wait_for_query_to_finish(self.client, resp, max=180.0)
       resp = self.client.get("/metastore/databases/")
-      assert_true(db_name_accent in resp.context['databases'], resp)
+      assert_true(db_name_accent in resp.context[0]['databases'], resp)
     finally:
       make_query(self.client, 'DROP DATABASE IF EXISTS %(db)s' % {'db': db_name}, wait=True)
       make_query(self.client, 'DROP DATABASE IF EXISTS %(db)s' % {'db': db_name_accent}, wait=True)
@@ -1737,9 +1737,9 @@ for x in sys.stdin:
       client.get('/beeswax/clone_design/%s' % (design.id,))
 
     resp = client.get('/beeswax/list_designs')
-    ids_page_1 = set([query.id for query in resp.context['page'].object_list])
+    ids_page_1 = set([query.id for query in resp.context[0]['page'].object_list])
     resp = client.get('/beeswax/list_designs?q-page=2')
-    ids_page_2 = set([query.id for query in resp.context['page'].object_list])
+    ids_page_2 = set([query.id for query in resp.context[0]['page'].object_list])
     for id in ids_page_2:
       assert_true(id not in ids_page_1)
 
@@ -2121,9 +2121,9 @@ def test_history_page():
   def do_view(param, n=1):
     resp = client.get('/beeswax/query_history?' + param)
     if n == 0:
-      assert_equal(len(resp.context['page'].object_list), 0)
+      assert_equal(len(resp.context[0]['page'].object_list), 0)
     else:
-      assert_true(len(resp.context['page'].object_list) >= n)     # Make the query run
+      assert_true(len(resp.context[0]['page'].object_list) >= n)     # Make the query run
     return resp
 
   do_view('')
@@ -2699,7 +2699,7 @@ class TestWithMockedServer(object):
     ids = [query, query2]
 
     resp = self.client.get('/beeswax/list_designs')
-    ids_page_1 = set([query.id for query in resp.context['page'].object_list])
+    ids_page_1 = set([query.id for query in resp.context[0]['page'].object_list])
     assert_equal(2, sum([query_id in ids_page_1 for query_id in ids]))
 
     resp = self.client.post(reverse('beeswax:delete_design'), {u'skipTrash': [u'false'], u'designs_selection': ids})
@@ -2708,7 +2708,7 @@ class TestWithMockedServer(object):
     assert_true(queries[1].doc.get().is_trashed())
 
     resp = self.client.get('/beeswax/list_designs')
-    ids_page_1 = set([query.id for query in resp.context['page'].object_list])
+    ids_page_1 = set([query.id for query in resp.context[0]['page'].object_list])
     assert_equal(0, sum([query_id in ids_page_1 for query_id in ids]))
 
     resp = self.client.post(reverse('beeswax:restore_design'), {u'skipTrash': [u'false'], u'designs_selection': ids})
@@ -2717,7 +2717,7 @@ class TestWithMockedServer(object):
     assert_false(queries[1].doc.get().is_trashed())
 
     resp = self.client.get('/beeswax/list_designs')
-    ids_page_1 = set([query.id for query in resp.context['page'].object_list])
+    ids_page_1 = set([query.id for query in resp.context[0]['page'].object_list])
     assert_equal(2, sum([query_id in ids_page_1 for query_id in ids]))
 
     resp = self.client.post(reverse('beeswax:delete_design'), {u'skipTrash': [u'false'], u'designs_selection': ids})
@@ -2726,14 +2726,14 @@ class TestWithMockedServer(object):
     assert_true(queries[1].doc.get().is_trashed())
 
     resp = self.client.get('/beeswax/list_designs')
-    ids_page_1 = set([query.id for query in resp.context['page'].object_list])
+    ids_page_1 = set([query.id for query in resp.context[0]['page'].object_list])
     assert_equal(0, sum([query_id in ids_page_1 for query_id in ids]))
 
     resp = self.client.post(reverse('beeswax:delete_design'), {u'skipTrash': [u'true'], u'designs_selection': ids})
     assert_false(SavedQuery.objects.filter(id__in=ids).exists())
 
     resp = self.client.get('/beeswax/list_designs')
-    ids_page_1 = set([query.id for query in resp.context['page'].object_list])
+    ids_page_1 = set([query.id for query in resp.context[0]['page'].object_list])
     assert_equal(0, sum([query_id in ids_page_1 for query_id in ids]))
 
   def test_save_design(self):
@@ -2898,7 +2898,7 @@ class TestWithMockedServer(object):
     page_2 = [query_id]
 
     resp = self.client.get(reverse('beeswax:list_designs') + '?text=Test+Search+Design')
-    ids_page = set([query.id for query in resp.context['page'].object_list])
+    ids_page = set([query.id for query in resp.context[0]['page'].object_list])
     assert_equal(0, sum([query_id in ids_page for query_id in page_1]))
     assert_equal(1, sum([query_id in ids_page for query_id in page_2]))
 
@@ -2908,7 +2908,7 @@ class TestWithMockedServer(object):
     SavedQuery.objects.filter(id__in=ids)
 
     resp = self.client.get(reverse('beeswax:list_trashed_designs') + '?text=Test+Search+Design')
-    ids_page = set([query.id for query in resp.context['page'].object_list])
+    ids_page = set([query.id for query in resp.context[0]['page'].object_list])
     assert_equal(0, sum([query_id in ids_page for query_id in page_1]))
     assert_equal(1, sum([query_id in ids_page for query_id in page_2]))
 

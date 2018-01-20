@@ -96,8 +96,8 @@ class TestMockedImpala:
       QueryHistory.objects.create(owner=user, design=impala_query, query='', last_state=QueryHistory.STATE.available.index)
 
       resp = self.client.get('/impala/my_queries')
-      assert_equal(len(resp.context['q_page'].object_list), 1)
-      assert_equal(resp.context['h_page'].object_list[0].design.name, 'create_saved_query')
+      assert_equal(len(resp.context[0]['q_page'].object_list), 1)
+      assert_equal(resp.context[0]['h_page'].object_list[0].design.name, 'create_saved_query')
     finally:
       if beewax_query is not None:
         beewax_query.delete()
