@@ -214,6 +214,7 @@ def get_api(request, snippet):
   from notebook.connectors.dataeng import DataEngApi
   from notebook.connectors.hbase import HBaseApi
   from notebook.connectors.hiveserver2 import HS2Api
+  from notebook.connectors.presto import PrestoApi
   from notebook.connectors.jdbc import JdbcApi
   from notebook.connectors.rdbms import RdbmsApi
   from notebook.connectors.oozie_batch import OozieApi
@@ -269,6 +270,8 @@ def get_api(request, snippet):
     return DataEngApi(user=request.user, request=request, cluster_name=cluster.get_interface())
   elif interface == 'jdbc' or interface == 'teradata':
     return JdbcApi(request.user, interpreter=interpreter)
+  elif interface == 'presto':
+    return PrestoApi(request.user, interpreter=interpreter)
   elif interface == 'solr':
     return SolrApi(request.user, interpreter=interpreter)
   elif interface == 'hbase':

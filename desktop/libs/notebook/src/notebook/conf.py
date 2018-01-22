@@ -45,6 +45,7 @@ def check_permissions(user, interpreter):
          (interpreter == 'impala' and 'impala' not in user_apps) or \
          (interpreter == 'pig' and 'pig' not in user_apps) or \
          (interpreter == 'solr' and 'search' not in user_apps) or \
+         (interpreter == 'presto' and 'presto' not in user_apps) or \
          (interpreter in ('spark', 'pyspark', 'r', 'jar', 'py') and 'spark' not in user_apps) or \
          (interpreter in ('java', 'spark2', 'mapreduce', 'shell', 'sqoop1', 'distcp') and 'oozie' not in user_apps)
 
@@ -73,7 +74,7 @@ def get_ordered_interpreters(user=None):
       "type": i,
       "interface": interpreters[i].INTERFACE.get(),
       "options": interpreters[i].OPTIONS.get(),
-      "is_sql" : interpreters[i].INTERFACE.get() in ["hiveserver2", "rdbms", "jdbc", "solr"]
+      "is_sql" : interpreters[i].INTERFACE.get() in ["hiveserver2", "rdbms", "jdbc", "solr", "presto"]
     }
     for i in reordered_interpreters
   ]
