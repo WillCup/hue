@@ -174,6 +174,8 @@ def download(request, path):
 
     return response
 
+class NoRightError(Exception):
+    pass
 
 def view(request, path):
     """Dispatches viewing of a path to either index() or fileview(), depending on type."""
@@ -195,11 +197,22 @@ def view(request, path):
         decoded_path = urllib.unquote(path)
         if path != decoded_path:
           path = decoded_path
+        if not path.startswith('/user/%s' % request.user.username):
+              raise NoRightError('Do under your own home path, sir!')
         stats = request.fs.stats(path)
         if stats.isDir:
             return listdir_paged(request, path)
         else:
             return display(request, path)
+      except NoRightError, e:
+          if request.is_ajax():
+              exception = {
+                  'error': e.message
+              }
+              return JsonResponse(exception)
+          else:
+              raise PopupException(e.message, detail=e)
+
     except S3FileSystemException, e:
         msg = _("S3 filesystem exception.")
         if request.is_ajax():
