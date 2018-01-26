@@ -49,6 +49,9 @@ def get(user, query_server=None):
   elif query_server['server_name'] == 'oracle':
     from librdbms.server.oracle_lib import OracleClient
 
+  elif query_server['server_name'] == 'presto':
+    from librdbms.server.presto import PrestoClient
+
     return Rdbms(OracleClient(query_server, user), ORACLE)
 
 
