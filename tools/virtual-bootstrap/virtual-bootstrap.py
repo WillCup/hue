@@ -457,7 +457,7 @@ def copyfileordir(src, dest, symlink=True):
         shutil.rmtree(dest)
         print('removed %s' % dest)
     else:
-        print('%s not found in this OS')
+        print('%s not found in this OS' % dest)
     if os.path.isdir(src):
         shutil.copytree(src, dest, symlink)
     else:
