@@ -452,6 +452,8 @@ def mkdir(path):
         logger.info('Directory %s already exists', path)
 
 def copyfileordir(src, dest, symlink=True):
+    if os.path.exists(dest):
+        shutil.rmtree(dest)
     if os.path.isdir(src):
         shutil.copytree(src, dest, symlink)
     else:
