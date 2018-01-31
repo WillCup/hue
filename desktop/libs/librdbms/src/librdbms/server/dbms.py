@@ -51,7 +51,7 @@ def get(user, query_server=None):
     return Rdbms(OracleClient(query_server, user), ORACLE)
 
   elif query_server['server_name'] == 'presto':
-    from librdbms.server.presto import PrestoClient
+    from librdbms.server.presto_pyhive import PrestoClient
     return Rdbms(PrestoClient(query_server, user), PRESTO)
 
 

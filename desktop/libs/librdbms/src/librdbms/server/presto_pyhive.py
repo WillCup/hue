@@ -19,7 +19,7 @@ import logging
 import urllib2
 
 try:
-    import prestodb.dbapi as Database
+    import pyhive.presto as Database
 except ImportError, e:
     from django.core.exceptions import ImproperlyConfigured
 
