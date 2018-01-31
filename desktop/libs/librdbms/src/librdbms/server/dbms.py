@@ -28,7 +28,7 @@ MYSQL = 'mysql'
 POSTGRESQL = 'postgresql'
 SQLITE = 'sqlite'
 ORACLE = 'oracle'
-
+PRESTO = 'presto'
 
 def get(user, query_server=None):
   if query_server is None:
@@ -48,11 +48,11 @@ def get(user, query_server=None):
     return Rdbms(SQLiteClient(query_server, user), SQLITE)
   elif query_server['server_name'] == 'oracle':
     from librdbms.server.oracle_lib import OracleClient
+    return Rdbms(OracleClient(query_server, user), ORACLE)
 
   elif query_server['server_name'] == 'presto':
     from librdbms.server.presto import PrestoClient
-
-    return Rdbms(OracleClient(query_server, user), ORACLE)
+    return Rdbms(PrestoClient(query_server, user), PRESTO)
 
 
 def get_query_server_config(server=None):

@@ -19,7 +19,7 @@ import logging
 import urllib2
 
 try:
-    import prestodb as Database
+    import prestodb.dbapi as Database
 except ImportError, e:
     from django.core.exceptions import ImproperlyConfigured
 
@@ -75,18 +75,24 @@ class PrestoClient(BaseRDMSClient):
     def _conn_params(self):
         params = {
             'user': self.query_server['username'],
-            'passwd': self.query_server['password'] or '',  # Presto can accept an empty password
-            'host': get_coordinator_host(self.query_server['app_name'], self.query_server['resource_manager']),
-            'port': self.query_server['server_port']
+            'host': get_coordinator_host(self.query_server['options']['app_name'], self.query_server['options']['resource_manager']),
+            'port': self.query_server['server_port'],
+            'catalog': self.query_server['options']['catalog'],
+            'schema': self.query_server['options']['schema']
         }
 
-        if self.query_server['options']:
-            params.update(self.query_server['options'])
+        # if self.query_server['options']:
+        #   params.update(self.query_server['options'])
 
         if 'name' in self.query_server:
             params['db'] = self.query_server['name']
 
         return params
+
+    def use(self, database):
+        cursor = self.connection.cursor()
+        cursor.execute("USE %s" % database)
+        self.connection.commit()
 
     def execute_statement(self, statement):
         cursor = self.connection.cursor()
@@ -119,9 +125,11 @@ class PrestoClient(BaseRDMSClient):
         query = 'SHOW TABLES'
         if table_names:
             clause = ' OR '.join(
-                ["`Tables_in_%(database)s` LIKE '%%%(table)s%%'" % {'database': database, 'table': table} for table in
+                ["Tables_in_%(database)s LIKE '%%%(table)s%%'" % {'database': database, 'table': table} for table in
                  table_names])
-            query += ' FROM `%(database)s` WHERE (%(clause)s)' % {'database': database, 'clause': clause}
+            query += ' FROM %(database)s WHERE (%(clause)s)' % {'database': database, 'clause': clause}
+        elif database:
+            query += ' FROM %(database)s ' % {'database': database}
         cursor.execute(query)
         self.connection.commit()
         return [row[0] for row in cursor.fetchall()]
@@ -137,6 +145,6 @@ class PrestoClient(BaseRDMSClient):
         return columns
 
     def get_sample_data(self, database, table, column=None, limit=100):
-        column = '`%s`' % column if column else '*'
-        statement = "SELECT %s FROM `%s`.`%s` LIMIT %d" % (column, database, table, limit)
+        column = '%s' % column if column else '*'
+        statement = "SELECT %s FROM %s.%s LIMIT %d" % (column, database, table, limit)
         return self.execute_statement(statement)
