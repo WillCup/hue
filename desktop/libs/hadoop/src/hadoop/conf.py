@@ -68,6 +68,10 @@ HDFS_CLUSTERS = UnspecifiedConfigSection(
                          help="The URL to WebHDFS/HttpFS service. Defaults to " +
                          "the WebHDFS URL on the NameNode.",
                          type=str, default="http://localhost:50070/webhdfs/v1"),
+      WEBHDFS_BACK_URL=Config("webhdfs_back_url",
+                         help="The URL to WebHDFS/HttpFS service. Defaults to " +
+                         "the WebHDFS URL on the NameNode.",
+                         type=str, default="http://localhost:50070/webhdfs/v1"),
       NN_KERBEROS_PRINCIPAL=Config("nn_kerberos_principal", help="Kerberos principal for NameNode", # Unused
                                    default="hdfs", type=str),
       DN_KERBEROS_PRINCIPAL=Config("dn_kerberos_principal", help="Kerberos principal for DataNode", # Unused

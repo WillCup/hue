@@ -63,7 +63,7 @@ class WebHdfs(Hdfs):
                ssl_cert_ca_verify=True,
                temp_dir="/tmp",
                umask=01022,
-               hdfs_supergroup=None):
+               hdfs_supergroup=None, back_url=None):
     self._url = url
     self._superuser = hdfs_superuser
     self._security_enabled = security_enabled
@@ -78,7 +78,7 @@ class WebHdfs(Hdfs):
     self._is_remote = False
     self._has_trash_support = True
 
-    self._client = self._make_client(url, security_enabled, ssl_cert_ca_verify)
+    self._client = self._make_client(url, security_enabled, ssl_cert_ca_verify, back_url)
     self._root = resource.Resource(self._client)
 
     # To store user info
@@ -97,7 +97,8 @@ class WebHdfs(Hdfs):
                ssl_cert_ca_verify=hdfs_config.SSL_CERT_CA_VERIFY.get(),
                temp_dir=hdfs_config.TEMP_DIR.get(),
                umask=get_umask_mode(),
-               hdfs_supergroup=get_supergroup())
+               hdfs_supergroup=get_supergroup(),
+               back_url=_get_back_service_url(hdfs_config))
 
   def __str__(self):
     return "WebHdfs at %s" % self._url
@@ -976,6 +977,16 @@ def _get_service_url(hdfs_config):
   port = hadoop.conf.DEFAULT_NN_HTTP_PORT
   return "http://%s:%s/webhdfs/v1" % (host, port)
 
+def _get_back_service_url(hdfs_config):
+  override = hdfs_config.WEBHDFS_BACK_URL.get()
+  if override:
+    return override
+
+  fs_defaultfs = hdfs_config.FS_DEFAULTFS.get()
+  netloc = Hdfs.urlsplit(fs_defaultfs)[1]
+  host = netloc.split(':')[0]
+  port = hadoop.conf.DEFAULT_NN_HTTP_PORT
+  return "http://%s:%s/webhdfs/v1" % (host, port)
 
 def test_fs_configuration(fs_config):
   """

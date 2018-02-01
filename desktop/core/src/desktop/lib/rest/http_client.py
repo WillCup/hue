@@ -95,7 +95,7 @@ class HttpClient(object):
   """
   Basic HTTP client tailored for rest APIs.
   """
-  def __init__(self, base_url, exc_class=None, logger=None):
+  def __init__(self, base_url, exc_class=None, logger=None, back_url=None):
     """
     @param base_url: The base url to the API.
     @param exc_class: An exception class to handle non-200 results.
@@ -105,6 +105,7 @@ class HttpClient(object):
     self._logger = logger or LOG
     self._session = get_request_session()
     self._cookies = None
+    self._back_url = back_url
 
   def set_kerberos_auth(self):
     """Set up kerberos auth for the client, based on the current ticket."""
@@ -144,7 +145,7 @@ class HttpClient(object):
   def set_verify(self, verify=True):
     self._session.verify = verify
     return self
-      
+
   def _get_headers(self, headers):
     if headers:
       self._session.headers.update(headers)
@@ -202,10 +203,37 @@ class HttpClient(object):
             exceptions.RequestException,
             exceptions.URLRequired,
             exceptions.TooManyRedirects), ex:
+      print('query for %{base_url}s failed, going to try with %{back_url}s' % {'base_url': self._base_url,
+                                                                               'back_url': self._back_url})
+      if self._back_url:
+        url = self._make_back_url(path, params)
+        try:
+          resp = getattr(self._session, http_method.lower())(url, **request_kwargs)
+          if resp.status_code >= 300:
+            resp.raise_for_status()
+            raise exceptions.HTTPError(response=resp)
+          # Cache request cookie for the next http_client call.
+          self._cookies = resp.cookies
+          return resp
+        except (exceptions.ConnectionError,
+                exceptions.HTTPError,
+                exceptions.RequestException,
+                exceptions.URLRequired,
+                exceptions.TooManyRedirects), ex:
+          raise self._exc_class(ex)
       raise self._exc_class(ex)
 
   def _make_url(self, path, params):
     res = self._base_url
+    if path:
+      res += posixpath.normpath('/' + path.lstrip('/'))
+    if params:
+      param_str = urlencode(params)
+      res += '?' + param_str
+    return iri_to_uri(res)
+
+  def _make_back_url(self, path, params):
+    res = self._back_url
     if path:
       res += posixpath.normpath('/' + path.lstrip('/'))
     if params:
