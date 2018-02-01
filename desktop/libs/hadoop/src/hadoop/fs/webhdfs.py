@@ -103,8 +103,8 @@ class WebHdfs(Hdfs):
   def __str__(self):
     return "WebHdfs at %s" % self._url
 
-  def _make_client(self, url, security_enabled, ssl_cert_ca_verify=True):
-    client = http_client.HttpClient(url, exc_class=WebHdfsException, logger=LOG)
+  def _make_client(self, url, security_enabled, ssl_cert_ca_verify=True, back_url=None):
+    client = http_client.HttpClient(url, exc_class=WebHdfsException, logger=LOG, back_url=back_url)
 
     if security_enabled:
       client.set_kerberos_auth()
@@ -228,7 +228,7 @@ class WebHdfs(Hdfs):
     path = self.normpath(path)
     if not self._is_remote:
       return path
-  
+
     split = urlparse(path)
     if not split.netloc:
       path = split._replace(netloc=self._netloc).geturl()
