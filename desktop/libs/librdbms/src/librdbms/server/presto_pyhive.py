@@ -73,9 +73,13 @@ class PrestoClient(BaseRDMSClient):
 
     @property
     def _conn_params(self):
+        if self.query_server['options']['on_yarn']:
+            host = get_coordinator_host(self.query_server['options']['app_name'], self.query_server['options']['resource_manager'])
+        else:
+            host = self.query_server['host']
         params = {
-            'user': self.query_server['username'],
-            'host': get_coordinator_host(self.query_server['options']['app_name'], self.query_server['options']['resource_manager']),
+            'username': self.query_server['username'],
+            'host': host,
             'port': self.query_server['server_port'],
             'catalog': self.query_server['options']['catalog'],
             'schema': self.query_server['options']['schema']
@@ -90,9 +94,7 @@ class PrestoClient(BaseRDMSClient):
         return params
 
     def use(self, database):
-        cursor = self.connection.cursor()
-        cursor.execute("USE %s" % database)
-        self.connection.commit()
+        print('USE statement not supported for now..')
 
     def execute_statement(self, statement):
         cursor = self.connection.cursor()
