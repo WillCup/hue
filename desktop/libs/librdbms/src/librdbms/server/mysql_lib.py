@@ -134,7 +134,7 @@ class MySQLClient(BaseRDMSClient):
 
   def execute_statement(self, statement):
     cursor = self.connection.cursor()
-    cursor.execute(statement)
+    cursor.execute(statement.encode('utf8').decode('latin1'))
     self.connection.commit()
 
     if cursor.description:
