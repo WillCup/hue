@@ -203,7 +203,7 @@ class HttpClient(object):
             exceptions.RequestException,
             exceptions.URLRequired,
             exceptions.TooManyRedirects), ex:
-      print('query for %{base_url}s failed, going to try with %{back_url}s' % {'base_url': self._base_url,
+      print('query for %(base_url)s failed, going to try with %(back_url)s' % {'base_url': self._base_url,
                                                                                'back_url': self._back_url})
       if self._back_url:
         url = self._make_back_url(path, params)
