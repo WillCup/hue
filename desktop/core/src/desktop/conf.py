@@ -948,6 +948,21 @@ AUTH = ConfigSection(
     ),
 ))
 
+CAS = ConfigSection(
+  key="cas",
+  help=_("Configuration options for CAS connectivity."),
+  members=dict(
+    CAS_SERVER_URL = Config("cas_server_url",
+      help=_("cas server url"),
+      default=""),
+    CAS_IDC_SERVER_URL = Config("cas_idc_server_url",
+      help=_("cas idc server url"),
+      default=""),
+    CAS_PROVIDE_URL_TO_LOGOUT = Config("cas_provide_url_to_logout",
+      help=_("cas server url"),
+      type = coerce_bool,
+      default=True),
+  ))
 
 LDAP = ConfigSection(
   key="ldap",

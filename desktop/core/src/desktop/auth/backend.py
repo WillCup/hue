@@ -246,6 +246,38 @@ class OAuthBackend(DesktopBackendBase):
   def manages_passwords_externally(cls):
     return True
 
+from cas.backends import _verify
+
+class CASBackend(DesktopBackendBase):
+  supports_object_permissions = False
+  supports_inactive_user = False
+
+  def authenticate(self, ticket, service):
+    """
+    Verifies CAS ticket and gets or creates User object
+    NB: Use of PT to identify proxy
+    """
+
+    username = _verify(ticket, service)
+
+    if not username:
+      return None
+
+    try:
+      user = User.objects.get(username__iexact=username)
+    except User.DoesNotExist:
+      # user will have an "unusable" password
+      if desktop.conf.CAS.CAS_AUTO_CREATE_USER:
+        user = User.objects.create_user(username, '')
+        user.save()
+      else:
+        user = None
+    user = rewrite_user(user)
+    return user
+
+  @classmethod
+  def manages_passwords_externally(cls):
+    return True
 
 class AllowAllBackend(DesktopBackendBase):
   """

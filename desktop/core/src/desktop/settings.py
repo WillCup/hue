@@ -302,6 +302,11 @@ SERVER_EMAIL = desktop.conf.DJANGO_SERVER_EMAIL.get()
 # Email backend
 EMAIL_BACKEND = desktop.conf.DJANGO_EMAIL_BACKEND.get()
 
+CAS_SERVER_URL = desktop.conf.CAS.CAS_SERVER_URL.get()
+CAS_IDC_SERVER_URL = desktop.conf.CAS.CAS_IDC_SERVER_URL.get()
+# CAS_LOGOUT_COMPLETELY = True
+CAS_PROVIDE_URL_TO_LOGOUT = desktop.conf.CAS.CAS_PROVIDE_URL_TO_LOGOUT.get()
+
 # Configure database
 if os.getenv('DESKTOP_DB_CONFIG'):
   conn_string = os.getenv('DESKTOP_DB_CONFIG')
