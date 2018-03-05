@@ -203,24 +203,25 @@ class HttpClient(object):
             exceptions.RequestException,
             exceptions.URLRequired,
             exceptions.TooManyRedirects), ex:
-      print('query for %(base_url)s failed, going to try with %(back_url)s' % {'base_url': self._base_url,
-                                                                               'back_url': self._back_url})
-      if self._back_url:
-        url = self._make_back_url(path, params)
-        try:
-          resp = getattr(self._session, http_method.lower())(url, **request_kwargs)
-          if resp.status_code >= 300:
-            resp.raise_for_status()
-            raise exceptions.HTTPError(response=resp)
-          # Cache request cookie for the next http_client call.
-          self._cookies = resp.cookies
-          return resp
-        except (exceptions.ConnectionError,
-                exceptions.HTTPError,
-                exceptions.RequestException,
-                exceptions.URLRequired,
-                exceptions.TooManyRedirects), ex:
-          raise self._exc_class(ex)
+      if ex.reponse and 'StandbyException' in ex.reponse.text:
+        print('query for %(base_url)s failed, going to try with %(back_url)s' % {'base_url': self._base_url,
+                                                                                 'back_url': self._back_url})
+        if self._back_url:
+          url = self._make_back_url(path, params)
+          try:
+            resp = getattr(self._session, http_method.lower())(url, **request_kwargs)
+            if resp.status_code >= 300:
+              resp.raise_for_status()
+              raise exceptions.HTTPError(response=resp)
+            # Cache request cookie for the next http_client call.
+            self._cookies = resp.cookies
+            return resp
+          except (exceptions.ConnectionError,
+                  exceptions.HTTPError,
+                  exceptions.RequestException,
+                  exceptions.URLRequired,
+                  exceptions.TooManyRedirects), ex:
+            raise self._exc_class(ex)
       raise self._exc_class(ex)
 
   def _make_url(self, path, params):
