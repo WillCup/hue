@@ -203,7 +203,7 @@ class HttpClient(object):
             exceptions.RequestException,
             exceptions.URLRequired,
             exceptions.TooManyRedirects), ex:
-      if ex.reponse and 'StandbyException' in ex.reponse.text:
+      if ex.response and 'StandbyException' in ex.response.text:
         print('query for %(base_url)s failed, going to try with %(back_url)s' % {'base_url': self._base_url,
                                                                                  'back_url': self._back_url})
         if self._back_url:
