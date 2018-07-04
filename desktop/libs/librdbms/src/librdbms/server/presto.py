@@ -42,7 +42,7 @@ class DataTable(BaseRDBMSDataTable): pass
 
 class Result(BaseRDBMSResult): pass
 
-
+# For slider version 0.90
 # def get_coordinator_host(app_name, rm):
 #     print 'http://{rm}/ws/v1/cluster/apps?states=RUNNING'.format(rm=rm)
 #     content = urllib2.urlopen('http://{rm}/ws/v1/cluster/apps?states=RUNNING'.format(rm=rm)).read()
@@ -61,6 +61,7 @@ class Result(BaseRDBMSResult): pass
 #             return mid.split('/')[0].replace('[', '')
 # 
 
+# For slider version 0.92
 def get_coordinator_host(app_name, rm):
     print 'http://{rm}/ws/v1/cluster/apps?states=RUNNING'.format(rm=rm)
     content = urllib2.urlopen('http://{rm}/ws/v1/cluster/apps?states=RUNNING'.format(rm=rm)).read()
