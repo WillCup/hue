@@ -43,6 +43,24 @@ class DataTable(BaseRDBMSDataTable): pass
 class Result(BaseRDBMSResult): pass
 
 
+# def get_coordinator_host(app_name, rm):
+#     print 'http://{rm}/ws/v1/cluster/apps?states=RUNNING'.format(rm=rm)
+#     content = urllib2.urlopen('http://{rm}/ws/v1/cluster/apps?states=RUNNING'.format(rm=rm)).read()
+#     results = json.loads(content)
+#     for app in results['apps']['app']:
+#         if app['name'] == app_name:
+#             break
+# 
+#     print app['trackingUrl']
+#     result = urllib2.urlopen(app['trackingUrl']).read()
+#     for line in result.split('\n'):
+#         if 'COORDINATOR Host' in line:
+#             print line
+#             mid = line.strip().split(' ')[2]
+#             print mid
+#             return mid.split('/')[0].replace('[', '')
+# 
+
 def get_coordinator_host(app_name, rm):
     print 'http://{rm}/ws/v1/cluster/apps?states=RUNNING'.format(rm=rm)
     content = urllib2.urlopen('http://{rm}/ws/v1/cluster/apps?states=RUNNING'.format(rm=rm)).read()
@@ -54,12 +72,10 @@ def get_coordinator_host(app_name, rm):
     print app['trackingUrl']
     result = urllib2.urlopen(app['trackingUrl']).read()
     for line in result.split('\n'):
-        if 'COORDINATOR Host' in line:
-            print line
-            mid = line.strip().split(' ')[2]
-            print mid
-            return mid.split('/')[0].replace('[', '')
-
+        if '8099' in line:
+            print ('line is %s' %line)
+            mid = line.strip().split(':')[0]
+            return mid
 
 class PrestoClient(BaseRDMSClient):
     """Same API as Beeswax"""
